@@ -4,6 +4,9 @@ import { useFetch } from '../../hooks/useFetch'
 import { useNavigate } from 'react-router-dom'
 import { useThem } from '../../hooks/useTheme'
 
+import { addDoc, collection } from 'firebase/firestore'
+import { db } from '../../firebase/config'
+
 export default function Create() {
 
   const [title , setTitle] = useState('')
@@ -12,13 +15,27 @@ export default function Create() {
   const [newIng , setNewIng] = useState('')
   const navigate = useNavigate()
   const [ingredients , setIngredients] = useState([])
-  const { data , isLoading , error , postData} = useFetch('http://localhost:3000/recipes','POST')
+  const [disabledBtn , setDisabledBtn ] = useState(false)
 
   const {mode}= useThem()
 
-  const handleSubmit = (e)=>{
+  const handleSubmit = async (e)=>{
     e.preventDefault() ; 
-    postData({title,ingredients,method,cookingTime:cookingTime+" minutes"})
+
+    setDisabledBtn(true)
+  
+    const doc = {title,ingredients,method,cookingTime:cookingTime+" minutes"}
+  
+    try {
+      
+      const ref = collection(db,'recipes')
+      await addDoc(ref , doc)
+      navigate('/')
+
+    } catch (err) {
+      console.log(err);
+      
+    }
   }
 
   const handleAdd=(e)=>{
@@ -29,12 +46,7 @@ export default function Create() {
     setNewIng('')
   }
 
-  useEffect(()=>{
-
-    if(data){
-      navigate('/')
-    }
-  },[data])
+  
 
   return (
     <div className={`create ${mode}`}>
@@ -73,7 +85,10 @@ export default function Create() {
           value={cookingTime}
           required />
         </label>
-        <button className='btn'>Submit</button>
+        <button className='btn' 
+          style={{background:disabledBtn?'gray':'#58249c'}}
+          disabled={disabledBtn}
+          >Submit</button>
       </form>
     </div>
   )

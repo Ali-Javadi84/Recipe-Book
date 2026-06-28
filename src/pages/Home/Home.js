@@ -1,11 +1,15 @@
 import './Home.css'
 
-import {useFetch} from '../../hooks/useFetch'
 import RecipeList from '../../components/RecipeList'
+
+import { collection, getDocs } from 'firebase/firestore'
+import { db } from '../../firebase/config'
+import { useCollection } from '../../hooks/useCollection'
 
 export default function Create() {
 
-  const { data , isLoading , error} = useFetch('http://localhost:3000/recipes')
+  const {collectionData:data , isLoading , error}=useCollection('recipes')  
+
   return (
     <div className='home'>
       {error && <p className='error'> {error}</p>}
